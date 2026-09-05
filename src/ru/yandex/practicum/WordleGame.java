@@ -16,6 +16,7 @@ import java.util.*;
  */
 public class WordleGame {
     private static final int MAX_STEPS = 6;
+    private static final int WORD_LENGTH = 5;
 
     private final String answer;
 
@@ -45,7 +46,12 @@ public class WordleGame {
     }
 
     public String checkGuess(String word) {
-        char[] result = new char[5];
+        if (word.length() != answer.length()) {
+            throw new IllegalStateException(
+                    "checkGuess вызван со словом некорректной длины: " + word);
+        }
+
+        char[] result = new char[WORD_LENGTH];
 
         Map<Character, Integer> availableLetters = new HashMap<>();
 
@@ -73,20 +79,34 @@ public class WordleGame {
         return new String(result);
     }
 
-    public String makeGuess(String word) throws WordNotFoundInDictionary {
-        if (!this.dictionary.containsWord(word)) {
+    public String makeGuess(String word) throws WordNotFoundInDictionary, InvalidWordLengthException {
+        String normalizedWord = WordleDictionary.normalize(word);
+
+        if (normalizedWord.length() != WORD_LENGTH) {
+            throw new InvalidWordLengthException("Слово должно состоять из 5 букв");
+        }
+
+        if (!this.dictionary.containsWord(normalizedWord)) {
             throw new WordNotFoundInDictionary("Такого слова в словаре нет");
         }
+
         this.steps--;
-        String normalizeWord = WordleDictionary.normalize(word);
-        String result = checkGuess(normalizeWord);
-        this.lastGuess = normalizeWord;
+        return evaluateGuess(normalizedWord);
+    }
 
-        updateConstraints(normalizeWord, result);
-        usedWords.add(normalizeWord);
+    public String requestHint() throws NoSuggestionAvailableException {
+        String suggestedWord = suggestWord();
+        return evaluateGuess(suggestedWord);
+    }
 
+    private String evaluateGuess(String normalizedWord) {
+        String result = checkGuess(normalizedWord);
+        this.lastGuess = normalizedWord;
+        updateConstraints(normalizedWord, result);
+        usedWords.add(normalizedWord);
         return result;
     }
+
 
     public boolean isWon() {
         return this.answer.equals(this.lastGuess);
@@ -98,6 +118,10 @@ public class WordleGame {
 
     public String getAnswer() {
         return answer;
+    }
+
+    public String getLastGuess() {
+        return lastGuess;
     }
 
     public void updateConstraints(String word, String result) {
@@ -126,7 +150,7 @@ public class WordleGame {
         return false;
     }
 
-    public String suggestWord() {
+    public String suggestWord() throws NoSuggestionAvailableException {
         List<String> candidates = new ArrayList<>();
 
         for (String candidate : dictionary.getWords()) {
@@ -174,7 +198,7 @@ public class WordleGame {
             }
         }
 
-        List<String> filteredByExactPosition = getStrings(filteredByWrongPositions);
+        List<String> filteredByExactPosition = filterByExactPositions(filteredByWrongPositions);
 
         Random random = new Random();
 
@@ -183,7 +207,8 @@ public class WordleGame {
         return filteredByExactPosition.get(randomIndex);
     }
 
-    private List<String> getStrings(List<String> filteredByWrongPositions) {
+    private List<String> filterByExactPositions(List<String> filteredByWrongPositions)
+            throws NoSuggestionAvailableException {
         List<String> filteredByExactPosition = new ArrayList<>();
 
         for (String candidate : filteredByWrongPositions) {
@@ -204,7 +229,7 @@ public class WordleGame {
         }
 
         if (filteredByExactPosition.isEmpty()) {
-            throw new RuntimeException("Алгоритм подсказки не нашёл ни одного подходящего слова — ошибка в логике фильтрации");
+            throw new NoSuggestionAvailableException("Подходящих слов не осталось");
         }
         return filteredByExactPosition;
     }

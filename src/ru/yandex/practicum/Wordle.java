@@ -47,14 +47,20 @@ public class Wordle {
                         String userWord = scanner.nextLine();
 
                         if (userWord.trim().isEmpty()) {
-                            userWord = wordleGame.suggestWord();
+                            String result = wordleGame.requestHint();
+                            System.out.println(wordleGame.getLastGuess());
+                            System.out.println(result);
+                        } else {
+                            String result = wordleGame.makeGuess(userWord);
+                            System.out.println(userWord);
+                            System.out.println(result);
                         }
-                        String result = wordleGame.makeGuess(userWord);
-
-                        System.out.println(userWord);
-                        System.out.println(result);
                     } catch (WordNotFoundInDictionary e) {
                         System.out.println("Такого слова нет в словаре");
+                    } catch (InvalidWordLengthException e) {
+                        System.out.println("Слово должно состоять из 5 букв");
+                    } catch (NoSuggestionAvailableException e) {
+                        System.out.println("Подходящих слов не осталось");
                     }
                 }
 

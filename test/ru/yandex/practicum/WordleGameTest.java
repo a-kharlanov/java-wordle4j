@@ -56,7 +56,7 @@ public class WordleGameTest {
     }
 
     @Test
-    void makeGuessShouldDecreaseStepsOnValidWord() throws WordNotFoundInDictionary {
+    void makeGuessShouldDecreaseStepsOnValidWord() throws WordNotFoundInDictionary, InvalidWordLengthException {
         WordleGame game = new WordleGame(dictionary, "манго");
 
         game.makeGuess("манго");
@@ -80,7 +80,7 @@ public class WordleGameTest {
     }
 
     @Test
-    void isWonShouldReturnTrueWhenGuessMatchesAnswer() throws WordNotFoundInDictionary {
+    void isWonShouldReturnTrueWhenGuessMatchesAnswer() throws WordNotFoundInDictionary, InvalidWordLengthException {
         WordleGame game = new WordleGame(dictionary, "манго");
 
         game.makeGuess("манго");
@@ -89,7 +89,7 @@ public class WordleGameTest {
     }
 
     @Test
-    void updateConstraintsShouldNotExcludeLetterWithMatchElsewhere() throws WordNotFoundInDictionary {
+    void updateConstraintsShouldNotExcludeLetterWithMatchElsewhere() throws WordNotFoundInDictionary, InvalidWordLengthException, NoSuggestionAvailableException {
         List<String> testWords = List.of("сахар", "такса", "парта");
         WordleDictionary customDictionary = new WordleDictionary(testWords);
         WordleGame game = new WordleGame(customDictionary, "сахар");
@@ -101,13 +101,37 @@ public class WordleGameTest {
     }
 
     @Test
-    void suggestWordShouldNotReturnAlreadyUsedWord() throws WordNotFoundInDictionary {
+    void suggestWordShouldNotReturnAlreadyUsedWord() throws WordNotFoundInDictionary, InvalidWordLengthException {
         List<String> testWords = List.of("парта", "марка");
         WordleDictionary customDictionary = new WordleDictionary(testWords);
         WordleGame game = new WordleGame(customDictionary, "парта");
 
         game.makeGuess("парта");
 
-        assertThrows(RuntimeException.class, game::suggestWord);
+        assertThrows(NoSuggestionAvailableException.class, game::suggestWord);
+    }
+
+    @Test
+    void makeGuessShouldThrowExceptionForWrongLength() {
+        WordleGame game = new WordleGame(dictionary, "манго");
+
+        assertThrows(InvalidWordLengthException.class, () -> game.makeGuess("оченьдлинноеслово"));
+        assertEquals(6, game.getSteps());
+    }
+
+    @Test
+    void requestHintShouldNotDecreaseSteps() throws NoSuggestionAvailableException {
+        WordleGame game = new WordleGame(dictionary, "манго");
+
+        game.requestHint();
+
+        assertEquals(6, game.getSteps());
+    }
+
+    @Test
+    void checkGuessShouldThrowExceptionForWrongLength() {
+        WordleGame game = new WordleGame(dictionary, "манго");
+
+        assertThrows(IllegalStateException.class, () -> game.checkGuess("оченьдлинноеслово"));
     }
 }
