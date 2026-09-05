@@ -63,6 +63,7 @@ public class WordleGameTest {
 
         assertEquals(5, game.getSteps());
     }
+
     @Test
     void makeGuessShouldNotDecreaseStepsOnInvalidWord() {
         WordleGame game = new WordleGame(dictionary, "манго");
@@ -70,6 +71,7 @@ public class WordleGameTest {
         assertThrows(WordNotFoundInDictionary.class, () -> game.makeGuess("зюзюк"));
         assertEquals(6, game.getSteps());
     }
+
     @Test
     void isWonShouldReturnFalseBeforeAnyGuess() {
         WordleGame game = new WordleGame(dictionary, "манго");
@@ -85,6 +87,7 @@ public class WordleGameTest {
 
         assertTrue(game.isWon());
     }
+
     @Test
     void updateConstraintsShouldNotExcludeLetterWithMatchElsewhere() throws WordNotFoundInDictionary {
         List<String> testWords = List.of("сахар", "такса", "парта");
@@ -96,6 +99,7 @@ public class WordleGameTest {
 
         assertTrue(customDictionary.containsWord(suggestion));
     }
+
     @Test
     void suggestWordShouldNotReturnAlreadyUsedWord() throws WordNotFoundInDictionary {
         List<String> testWords = List.of("парта", "марка");
