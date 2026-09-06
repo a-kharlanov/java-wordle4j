@@ -134,4 +134,28 @@ public class WordleGameTest {
 
         assertThrows(IllegalStateException.class, () -> game.checkGuess("оченьдлинноеслово"));
     }
+
+    @Test
+    void makeGuessShouldThrowGameOverExceptionWhenStepsExhausted()
+            throws WordNotFoundInDictionary, InvalidWordLengthException {
+        WordleGame game = new WordleGame(dictionary, "манго");
+
+        for (int i = 0; i < 6; i++) {
+            game.makeGuess("парта");
+        }
+
+        assertThrows(GameOverException.class, () -> game.makeGuess("парта"));
+    }
+
+    @Test
+    void requestHintShouldThrowGameOverExceptionWhenStepsExhausted()
+            throws WordNotFoundInDictionary, InvalidWordLengthException {
+        WordleGame game = new WordleGame(dictionary, "манго");
+
+        for (int i = 0; i < 6; i++) {
+            game.makeGuess("парта");
+        }
+
+        assertThrows(GameOverException.class, game::requestHint);
+    }
 }

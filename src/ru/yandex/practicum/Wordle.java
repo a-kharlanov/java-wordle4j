@@ -61,6 +61,8 @@ public class Wordle {
                         System.out.println("Слово должно состоять из 5 букв");
                     } catch (NoSuggestionAvailableException e) {
                         System.out.println("Подходящих слов не осталось");
+                    } catch (GameOverException e) {
+                        System.out.println("Игра уже завершена");
                     }
                 }
 

@@ -46,7 +46,7 @@ public class WordleGame {
     }
 
     public String checkGuess(String word) {
-        if (word.length() != answer.length()) {
+        if (word.length() != WORD_LENGTH) {
             throw new IllegalStateException(
                     "checkGuess вызван со словом некорректной длины: " + word);
         }
@@ -80,6 +80,8 @@ public class WordleGame {
     }
 
     public String makeGuess(String word) throws WordNotFoundInDictionary, InvalidWordLengthException {
+        ensureGameNotOver();
+
         String normalizedWord = WordleDictionary.normalize(word);
 
         if (normalizedWord.length() != WORD_LENGTH) {
@@ -95,6 +97,8 @@ public class WordleGame {
     }
 
     public String requestHint() throws NoSuggestionAvailableException {
+        ensureGameNotOver();
+
         String suggestedWord = suggestWord();
         return evaluateGuess(suggestedWord);
     }
@@ -232,5 +236,11 @@ public class WordleGame {
             throw new NoSuggestionAvailableException("Подходящих слов не осталось");
         }
         return filteredByExactPosition;
+    }
+
+    private void ensureGameNotOver() {
+        if (steps <= 0) {
+            throw new GameOverException("Игра уже завершена, попытки закончились");
+        }
     }
 }
